@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Latihan Interaktif Matematika - SMP Al-Mazaya</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Font Inter & Outfit -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        display: ['Outfit', 'sans-serif'],
+                    },
+                    colors: {
+                        mazaya: {
+                            50: '#eefbfa',
+                            100: '#d5f5f2',
+                            500: '#0d9488',
+                            600: '#0d766e',
+                            700: '#0f766e',
+                            800: '#115e59',
+                            900: '#134e4a',
+                        },
+                        gold: {
+                            400: '#facc15',
+                            500: '#eab308',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .drag-item {
+            touch-action: none;
+            user-select: none;
+        }
+        .animate-bounce-short {
+            animation: bounce 0.5s ease infinite alternate;
+        }
+        @keyframes bounce {
+            from { transform: translateY(0); }
+            to { transform: translateY(-6px); }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen font-sans antialiased pb-12">
+
+    <!-- Top Header Navigation -->
+    <header class="bg-gradient-to-r from-emerald-800 via-teal-800 to-emerald-900 text-white shadow-lg sticky top-0 z-40">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-3">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-white/10 backdrop-blur flex items-center justify-center text-emerald-300 font-bold text-xl border border-white/20">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                </div>
+                <div>
+                    <h1 class="font-display font-bold text-lg md:text-xl tracking-tight text-white leading-tight">
+                        SMP AL-MAZAYA ISLAMIC SCHOOL
+                    </h1>
+                    <p class="text-xs text-emerald-200 font-medium">Latihan Interaktif Matematika • Kelas 7 (Bab 1: Bilangan Bulat)</p>
+                </div>
+            </div>
+
+            <!-- Score & Progress Badge -->
+            <div class="flex items-center gap-3 ml-auto sm:ml-0">
+                <div class="bg-emerald-950/60 backdrop-blur border border-emerald-500/30 px-3 py-1.5 rounded-xl flex items-center gap-2">
+                    <i class="fa-solid fa-trophy text-amber-400 text-sm"></i>
+                    <span class="text-xs text-emerald-100 font-medium">Skor:</span>
+                    <span id="score-display" class="font-bold text-amber-300 text-base">0 / 100</span>
+                </div>
+                <button onclick="resetAllQuiz()" class="bg-white/10 hover:bg-white/20 text-white px-3 py-1.5 rounded-xl text-xs font-semibold border border-white/20 transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-rotate-right"></i>
+                    <span class="hidden sm:inline">Riset</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-5xl mx-auto px-4 mt-6 space-y-8">
+
+        <!-- Interactive Visual Aid Card (Garis Bilangan) -->
+        <div class="bg-white rounded-2xl p-5 md:p-6 shadow-sm border border-slate-200">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-2">
+                    <span class="w-8 h-8 rounded-lg bg-teal-100 text-teal-700 flex items-center justify-center font-bold text-sm">
+                        <i class="fa-solid fa-compass"></i>
+                    </span>
+                    <h2 class="font-display font-bold text-slate-800 text-lg">Alat Bantu Visual: Garis Bilangan Interaktif</h2>
+                </div>
+                <span class="text-xs font-medium text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full">Eksplorasi</span>
+            </div>
+            
+            <p class="text-xs md:text-sm text-slate-600 mb-4">
+                Gunakan simulator di bawah ini untuk memahami bahwa semakin ke <strong>kanan</strong> posisinya, nilainya semakin <strong>besar</strong> (+). Semakin ke <strong>kiri</strong>, nilainya semakin <strong>kecil</strong> (-).
+            </p>
+
+            <div class="bg-slate-900 rounded-xl p-4 text-white">
+                <div class="flex justify-between items-center text-xs text-slate-400 mb-2 font-mono">
+                    <span><i class="fa-solid fa-arrow-left"></i> Makin Kecil (Negatif)</span>
+                    <span id="line-indicator-val" class="text-amber-400 font-bold text-sm">Nilai Terpilih: 0</span>
+                    <span>Makin Besar (Positif) <i class="fa-solid fa-arrow-right"></i></span>
+                </div>
+                
+                <input type="range" id="numberline-slider" min="-10" max="10" value="0" step="1" 
+                       class="w-full h-3 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-teal-400 my-2"
+                       oninput="updateNumberLine(this.value)">
+                
+                <div id="numberline-ticks" class="flex justify-between text-xs font-mono text-slate-400 px-1 mt-1">
+                    <!-- Ticks standard via JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 1: Nyatakan Positif / Negatif -->
+        <section class="bg-white rounded-2xl p-5 md:p-6 shadow-sm border border-slate-200 relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-2 h-full bg-teal-600"></div>
+            
+            <div class="flex items-start justify-between mb-4">
+                <div>
+                    <span class="text-xs font-bold text-teal-600 uppercase tracking-wider">Bagian 1</span>
+                    <h2 class="font-display font-bold text-slate-800 text-xl mt-0.5">
+                        1. Menyatakan Bilangan dengan Tanda Positif (+) atau Negatif (-)
+                    </h2>
+                </div>
+                <span class="bg-teal-50 text-teal-700 text-xs font-semibold px-3 py-1 rounded-full border border-teal-200">
+                    3 Soal
+                </span>
+            </div>
+
+            <p class="text-sm text-slate-600 mb-6">
+                Pilihlah bentuk penulisan bilangan bulat yang paling tepat sesuai dengan konteks cerita di bawah ini:
+            </p>
+
+            <div class="space-y-6">
+                <!-- Soal 1a -->
+                <div id="q1a-card" class="bg-slate-50 p-4 md:p-5 rounded-xl border border-slate-200 transition">
+                    <div class="flex items-start gap-3">
+                        <span class="font-bold text-slate-700 bg-white shadow-sm border border-slate-200 w-7 h-7 rounded-lg flex items-center justify-center shrink-0 text-sm">a</span>
+                        <div class="w-full">
+                            <p class="text-sm font-medium text-slate-800 mb-3">
+                                Lia baru membuka tabungan di koperasi sekolah lalu ia <strong>menyetorkan uang</strong> sebesar <strong>Rp100.000,00</strong>.
+                            </p>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                                <button onclick="selectOption('1a', '+100.000', true)" id="opt-1a-pos" 
+                                        class="q1a-btn p-3 rounded-xl border border-slate-300 bg-white hover:bg-teal-50 hover:border-teal-400 text-slate-700 text-sm font-semibold flex items-center justify-between transition">
+                                    <span>+100.000</span>
+                                    <i class="fa-solid fa-plus text-emerald-500"></i>
+                                </button>
+                                <button onclick="selectOption('1a', '-100.000', false)" id="opt-1a-neg" 
+                                        class="q1a-btn p-3 rounded-xl border border-slate-300 bg-white hover:bg-red-50 hover:border-red-400 text-slate-700 text-sm font-semibold flex items-center justify-between transition">
+                                    <span>-100.000</span>
+                                    <i class="fa-solid fa-minus text-rose-500"></i>
+                                </button>
+                            </div>
+                            <div id="feedback-1a" class="hidden text-xs p-3 rounded-lg mt-2"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Soal 1b -->
+                <div id="q1b-card" class="bg-slate-50 p-4 md:p-5 rounded-xl border border-slate-200 transition">
+                    <div class="flex items-start gap-3">
+                        <span class="font-bold text-slate-700 bg-white shadow-sm border border-slate-200 w-7 h-7 rounded-lg flex items-center justify-center shrink-0 text-sm">b</span>
+                        <div class="w-full">
+                            <p class="text-sm font-medium text-slate-800 mb-3">
+                                Dino <strong>meminjam uang</strong> kepada Anne sebesar <strong>Rp50.000,00</strong>.
+                            </p>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                                <button onclick="selectOption('1b', '+50.000', false)" id="opt-1b-pos" 
+                                        class="q1b-btn p-3 rounded-xl border border-slate-300 bg-white hover:bg-teal-50 hover:border-teal-400 text-slate-700 text-sm font-semibold flex items-center justify-between transition">
+                                    <span>+50.000</span>
+                                    <i class="fa-solid fa-plus text-emerald-500"></i>
+                                </button>
+                                <button onclick="selectOption('1b', '-50.000', true)" id="opt-1b-neg" 
+                                        class="q1b-btn p-3 rounded-xl border border-slate-300 bg-white hover:bg-red-50 hover:border-red-400 text-slate-700 text-sm font-semibold flex items-center justify-between transition">
+                                    <span>-50.000</span>
+                                    <i class="fa-solid fa-minus text-rose-500"></i>
+                                </button>
+                            </div>
+                            <div id="feedback-1b" class="hidden text-xs p-3 rounded-lg mt-2"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Soal 1c -->
+                <div id="q1c-card" class="bg-slate-50 p-4 md:p-5 rounded-xl border border-slate-200 transition">
+                    <div class="flex items-start gap-3">
+                        <span class="font-bold text-slate-700 bg-white shadow-sm border border-slate-200 w-7 h-7 rounded-lg flex items-center justify-center shrink-0 text-sm">c</span>
+                        <div class="w-full">
+                            <p class="text-sm font-medium text-slate-800 mb-3">
+                                Penjualan di toko hari ini mengalami <strong>kerugian</strong> sebesar <strong>Rp250.000,00</strong>.
+                            </p>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                                <button onclick="selectOption('1c', '+250.000', false)" id="opt-1c-pos" 
+                                        class="q1c-btn p-3 rounded-xl border border-slate-300 bg-white hover:bg-teal-50 hover:border-teal-400 text-slate-700 text-sm font-semibold flex items-center justify-between transition">
+                                    <span>+250.000</span>
+                                    <i class="fa-solid fa-plus text-emerald-500"></i>
+                                </button>
+                                <button onclick="selectOption('1c', '-250.000', true)" id="opt-1c-neg" 
+                                        class="q1c-btn p-3 rounded-xl border border-slate-300 bg-white hover:bg-red-50 hover:border-red-400 text-slate-700 text-sm font-semibold flex items-center justify-between transition">
+                                    <span>-250.000</span>
+                                    <i class="fa-solid fa-minus text-rose-500"></i>
+                                </button>
+                            </div>
+                            <div id="feedback-1c" class="hidden text-xs p-3 rounded-lg mt-2"></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Section 2: Membandingkan Bilangan (> atau <) -->
+        <section class="bg-white rounded-2xl p-5 md:p-6 shadow-sm border border-slate-200 relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-2 h-full bg-amber-500"></div>
+
+            <div class="flex items-start justify-between mb-4">
+                <div>
+                    <span class="text-xs font-bold text-amber-600 uppercase tracking-wider">Bagian 2</span>
+                    <h2 class="font-display font-bold text-slate-800 text-xl mt-0.5">
+                        2. Membandingkan Dua Bilangan Bulat
+                    </h2>
+                </div>
+                <span class="bg-amber-50 text-amber-700 text-xs font-semibold px-3 py-1 rounded-full border border-amber-200">
+                    3 Soal
+                </span>
+            </div>
+
+            <p class="text-sm text-slate-600 mb-6">
+                Isilah titik-titik dengan tanda <strong>"&gt;"</strong> (lebih dari) atau <strong>"&lt;"</strong> (kurang dari):
+            </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <!-- Soal 2a -->
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 text-center">
+                    <p class="text-xs font-semibold text-slate-500 mb-2">Soal 2a</p>
+                    <div class="flex items-center justify-center gap-2 mb-3">
+                        <span class="font-mono text-lg font-bold text-slate-800">-253</span>
+                        <div id="symbol-2a" class="w-10 h-10 rounded-lg border-2 border-dashed border-amber-400 bg-white flex items-center justify-center font-bold text-amber-600 text-xl shadow-inner">
+                            ?
+                        </div>
+                        <span class="font-mono text-lg font-bold text-slate-800">108</span>
+                    </div>
+                    <div class="flex gap-2 justify-center">
+                        <button onclick="checkCompare('2a', '<', '<', '-253 berada di sebelah kiri 108 pada garis bilangan')" 
+                                class="btn-2a px-4 py-2 bg-white hover:bg-amber-50 border border-slate-300 rounded-lg text-slate-800 font-bold transition text-base shadow-sm">
+                            &lt;
+                        </button>
+                        <button onclick="checkCompare('2a', '>', '<', '-253 berada di sebelah kiri 108 pada garis bilangan')" 
+                                class="btn-2a px-4 py-2 bg-white hover:bg-amber-50 border border-slate-300 rounded-lg text-slate-800 font-bold transition text-base shadow-sm">
+                            &gt;
+                        </button>
+                    </div>
+                    <div id="feedback-2a" class="hidden text-xs mt-3 p-2 rounded"></div>
+                </div>
+
+                <!-- Soal 2b -->
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 text-center">
+                    <p class="text-xs font-semibold text-slate-500 mb-2">Soal 2b</p>
+                    <div class="flex items-center justify-center gap-2 mb-3">
+                        <span class="font-mono text-lg font-bold text-slate-800">38</span>
+                        <div id="symbol-2b" class="w-10 h-10 rounded-lg border-2 border-dashed border-amber-400 bg-white flex items-center justify-center font-bold text-amber-600 text-xl shadow-inner">
+                            ?
+                        </div>
+                        <span class="font-mono text-lg font-bold text-slate-800">-79</span>
+                    </div>
+                    <div class="flex gap-2 justify-center">
+                        <button onclick="checkCompare('2b', '<', '>', 'Bilangan positif selalu lebih besar dari bilangan negatif')" 
+                                class="btn-2b px-4 py-2 bg-white hover:bg-amber-50 border border-slate-300 rounded-lg text-slate-800 font-bold transition text-base shadow-sm">
+                            &lt;
+                        </button>
+                        <button onclick="checkCompare('2b', '>', '>', 'Bilangan positif selalu lebih besar dari bilangan negatif')" 
+                                class="btn-2b px-4 py-2 bg-white hover:bg-amber-50 border border-slate-300 rounded-lg text-slate-800 font-bold transition text-base shadow-sm">
+                            &gt;
+                        </button>
+                    </div>
+                    <div id="feedback-2b" class="hidden text-xs mt-3 p-2 rounded"></div>
+                </div>
+
+                <!-- Soal 2c -->
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 text-center">
+                    <p class="text-xs font-semibold text-slate-500 mb-2">Soal 2c</p>
+                    <div class="flex items-center justify-center gap-2 mb-3">
+                        <span class="font-mono text-lg font-bold text-slate-800">-1000</span>
+                        <div id="symbol-2c" class="w-10 h-10 rounded-lg border-2 border-dashed border-amber-400 bg-white flex items-center justify-center font-bold text-amber-600 text-xl shadow-inner">
+                            ?
+                        </div>
+                        <span class="font-mono text-lg font-bold text-slate-800">500</span>
+                    </div>
+                    <div class="flex gap-2 justify-center">
+                        <button onclick="checkCompare('2c', '<', '<', '-1000 nilainya jauh lebih kecil daripada 500')" 
+                                class="btn-2c px-4 py-2 bg-white hover:bg-amber-50 border border-slate-300 rounded-lg text-slate-800 font-bold transition text-base shadow-sm">
+                            &lt;
+                        </button>
+                        <button onclick="checkCompare('2c', '>', '<', '-1000 nilainya jauh lebih kecil daripada 500')" 
+                                class="btn-2c px-4 py-2 bg-white hover:bg-amber-50 border border-slate-300 rounded-lg text-slate-800 font-bold transition text-base shadow-sm">
+                            &gt;
+                        </button>
+                    </div>
+                    <div id="feedback-2c" class="hidden text-xs mt-3 p-2 rounded"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Mengurutkan Bilangan -->
+        <section class="bg-white rounded-2xl p-5 md:p-6 shadow-sm border border-slate-200 relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-2 h-full bg-indigo-600"></div>
+
+            <div class="flex items-start justify-between mb-4">
+                <div>
+                    <span class="text-xs font-bold text-indigo-600 uppercase tracking-wider">Bagian 3</span>
+                    <h2 class="font-display font-bold text-slate-800 text-xl mt-0.5">
+                        3. Mengurutkan Bilangan Bulat (Terkecil ke Terbesar)
+                    </h2>
+                </div>
+                <span class="bg-indigo-50 text-indigo-700 text-xs font-semibold px-3 py-1 rounded-full border border-indigo-200">
+                    3 Soal Interaktif
+                </span>
+            </div>
+
+            <p class="text-sm text-slate-600 mb-6">
+                Klik tombol panah <i class="fa-solid fa-arrow-left"></i> / <i class="fa-solid fa-arrow-right"></i> pada tiap kartu angka untuk menggeser posisinya hingga tersusun dari <strong>paling kecil ke paling besar</strong>.
+            </p>
+
+            <div class="space-y-6">
+                <!-- Soal 3a -->
+                <div class="bg-slate-50 p-4 md:p-5 rounded-xl border border-slate-200">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="font-bold text-slate-700 bg-white border border-slate-200 px-2.5 py-1 rounded-lg text-xs">Soal 3a</span>
+                        <span class="text-xs text-slate-500 font-medium">Susun: -8, 4, -2, 12</span>
+                    </div>
+
+                    <!-- Interactive Cards Array 3a -->
+                    <div id="sort-container-3a" class="flex flex-wrap gap-2 md:gap-3 justify-center my-4">
+                        <!-- Rendered by JS -->
+                    </div>
+
+                    <div class="flex items-center justify-between mt-3 pt-3 border-t border-slate-200">
+                        <button onclick="checkOrdering('3a')" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs px-4 py-2 rounded-lg transition flex items-center gap-1.5">
+                            <i class="fa-solid fa-check"></i> Cek Urutan 3a
+                        </button>
+                        <div id="feedback-3a" class="text-xs font-semibold"></div>
+                    </div>
+                </div>
+
+                <!-- Soal 3b -->
+                <div class="bg-slate-50 p-4 md:p-5 rounded-xl border border-slate-200">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="font-bold text-slate-700 bg-white border border-slate-200 px-2.5 py-1 rounded-lg text-xs">Soal 3b</span>
+                        <span class="text-xs text-slate-500 font-medium">Susun: 23, -32, -47, 48</span>
+                    </div>
+
+                    <!-- Interactive Cards Array 3b -->
+                    <div id="sort-container-3b" class="flex flex-wrap gap-2 md:gap-3 justify-center my-4">
+                        <!-- Rendered by JS -->
+                    </div>
+
+                    <div class="flex items-center justify-between mt-3 pt-3 border-t border-slate-200">
+                        <button onclick="checkOrdering('3b')" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs px-4 py-2 rounded-lg transition flex items-center gap-1.5">
+                            <i class="fa-solid fa-check"></i> Cek Urutan 3b
+                        </button>
+                        <div id="feedback-3b" class="text-xs font-semibold"></div>
+                    </div>
+                </div>
+
+                <!-- Soal 3c -->
+                <div class="bg-slate-50 p-4 md:p-5 rounded-xl border border-slate-200">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="font-bold text-slate-700 bg-white border border-slate-200 px-2.5 py-1 rounded-lg text-xs">Soal 3c</span>
+                        <span class="text-xs text-slate-500 font-medium">Susun: -59, -100, -11, 21</span>
+                    </div>
+
+                    <!-- Interactive Cards Array 3c -->
+                    <div id="sort-container-3c" class="flex flex-wrap gap-2 md:gap-3 justify-center my-4">
+                        <!-- Rendered by JS -->
+                    </div>
+
+                    <div class="flex items-center justify-between mt-3 pt-3 border-t border-slate-200">
+                        <button onclick="checkOrdering('3c')" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs px-4 py-2 rounded-lg transition flex items-center gap-1.5">
+                            <i class="fa-solid fa-check"></i> Cek Urutan 3c
+                        </button>
+                        <div id="feedback-3c" class="text-xs font-semibold"></div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Action Footer -->
+        <div class="bg-gradient-to-r from-emerald-900 via-teal-900 to-slate-900 text-white p-6 rounded-2xl shadow-xl flex flex-col md:flex-row items-center justify-between gap-4">
+            <div>
+                <h3 class="font-display font-bold text-lg text-emerald-300">Selesai Mengerjakan Semua Soal?</h3>
+                <p class="text-xs text-slate-300 mt-1">Klik tombol di samping untuk melihat ringkasan hasil belajar dan kunci pembahasan.</p>
+            </div>
+            <button onclick="showFinalReport()" class="w-full md:w-auto bg-amber-400 hover:bg-amber-300 text-slate-900 font-bold px-6 py-3 rounded-xl shadow-lg transition flex items-center justify-center gap-2 text-sm shrink-0">
+                <i class="fa-solid fa-award text-base"></i> Lihat Laporan Hasil & Kunci
+            </button>
+        </div>
+
+    </main>
+
+    <!-- Modal Summary / Report -->
+    <div id="report-modal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl relative border border-slate-100 animate-in fade-in zoom-in duration-200">
+            <button onclick="closeModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 bg-amber-100 rounded-2xl flex items-center justify-center mx-auto mb-3 text-amber-500 text-3xl shadow-inner">
+                    <i class="fa-solid fa-star"></i>
+                </div>
+                <h2 class="font-display font-bold text-slate-800 text-2xl">Hasil Latihan Siswa</h2>
+                <p class="text-xs text-slate-500 mt-1">SMP Al-Mazaya Islamic School - Bab 1: Bilangan Bulat</p>
+            </div>
+
+            <div class="bg-slate-50 rounded-xl p-4 mb-5 border border-slate-200 space-y-2">
+                <div class="flex justify-between text-sm">
+                    <span class="text-slate-600">Total Nilai Akumulasi:</span>
+                    <span id="modal-score" class="font-bold text-emerald-600 text-lg">0 / 100</span>
+                </div>
+                <div class="flex justify-between text-xs text-slate-500">
+                    <span>Soal Selesai Dijawab:</span>
+                    <span id="modal-answered" class="font-semibold text-slate-700">0 dari 9 soal</span>
+                </div>
+                <div class="w-full bg-slate-200 rounded-full h-2 mt-2 overflow-hidden">
+                    <div id="modal-progress-bar" class="bg-emerald-500 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <div id="modal-evaluation" class="text-xs text-slate-600 bg-emerald-50 p-3 rounded-lg border border-emerald-200 mb-5 leading-relaxed">
+                <!-- Evaluation message generated by JS -->
+            </div>
+
+            <div class="flex gap-2">
+                <button onclick="closeModal()" class="w-1/2 bg-slate-200 hover:bg-slate-300 text-slate-800 font-semibold py-2.5 rounded-xl text-xs transition">
+                    Kembali Ke Soal
+                </button>
+                <button onclick="window.print()" class="w-1/2 bg-emerald-700 hover:bg-emerald-800 text-white font-semibold py-2.5 rounded-xl text-xs transition flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-print"></i> Cetak / Simpan PDF
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Quiz State Tracker
+        const quizState = {
+            '1a': { answered: false, correct: false, score: 0 },
+            '1b': { answered: false, correct: false, score: 0 },
+            '1c': { answered: false, correct: false, score: 0 },
+            '2a': { answered: false, correct: false, score: 0 },
+            '2b': { answered: false, correct: false, score: 0 },
+            '2c': { answered: false, correct: false, score: 0 },
+            '3a': { answered: false, correct: false, score: 0 },
+            '3b': { answered: false, correct: false, score: 0 },
+            '3c': { answered: false, correct: false, score: 0 }
+        };
+
+        // Section 3 Drag/Ordering Array Data
+        const orderData = {
+            '3a': {
+                current: [-2, 12, -8, 4], // Initial randomized order
+                target: [-8, -2, 4, 12]
+            },
+            '3b': {
+                current: [23, -47, -32, 48],
+                target: [-47, -32, 23, 48]
+            },
+            '3c': {
+                current: [-11, 21, -59, -100],
+                target: [-100, -59, -11, 21]
+            }
+        };
+
+        // Initialize on load
+        window.onload = function() {
+            initNumberLineTicks();
+            renderOrderCards('3a');
+            renderOrderCards('3b');
+            renderOrderCards('3c');
+            updateTotalScore();
+        };
+
+        // --- Number Line Explorer ---
+        function initNumberLineTicks() {
+            const ticksContainer = document.getElementById('numberline-ticks');
+            ticksContainer.innerHTML = '';
+            for (let i = -10; i <= 10; i += 2) {
+                const span = document.createElement('span');
+                span.innerText = i > 0 ? `+${i}` : `${i}`;
+                if (i === 0) span.className = 'font-bold text-amber-400';
+                ticksContainer.appendChild(span);
+            }
+        }
+
+        function updateNumberLine(val) {
+            const indicator = document.getElementById('line-indicator-val');
+            const num = parseInt(val);
+            const sign = num > 0 ? '+' : '';
+            indicator.innerText = `Nilai Terpilih: ${sign}${num}`;
+        }
+
+        // --- Section 1 Handler ---
+        function selectOption(qId, valText, isCorrect) {
+            const card = document.getElementById(`q${qId}-card`);
+            const feedback = document.getElementById(`feedback-${qId}`);
+            
+            quizState[qId].answered = true;
+            quizState[qId].correct = isCorrect;
+            quizState[qId].score = isCorrect ? 11 : 0; // ~11 points per question (Total 99-100)
+
+            // Update UI buttons
+            const btns = document.querySelectorAll(`.q${qId}-btn`);
+            btns.forEach(btn => {
+                btn.classList.remove('bg-emerald-100', 'border-emerald-500', 'bg-rose-100', 'border-rose-500');
+            });
+
+            feedback.classList.remove('hidden', 'bg-emerald-100', 'text-emerald-800', 'bg-rose-100', 'text-rose-800');
+
+            if (isCorrect) {
+                feedback.classList.add('bg-emerald-100', 'text-emerald-900', 'border', 'border-emerald-300');
+                feedback.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600 mr-1"></i> <strong>Tepat sekali!</strong> Pilihan <strong>${valText}</strong> sudah benar sesuai dengan prinsip matematika.`;
+            } else {
+                feedback.classList.add('bg-rose-100', 'text-rose-900', 'border', 'border-rose-300');
+                feedback.innerHTML = `<i class="fa-solid fa-circle-xmark text-rose-600 mr-1"></i> <strong>Kurang tepat.</strong> Ingat: Meminjam atau Kerugian bernilai <strong>negatif (-)</strong>, sedangkan Tabungan/Setoran bernilai <strong>positif (+)</strong>.`;
+            }
+
+            updateTotalScore();
+        }
+
+        // --- Section 2 Handler ---
+        function checkCompare(qId, chosen, target, explanation) {
+            const symbolBox = document.getElementById(`symbol-${qId}`);
+            const feedback = document.getElementById(`feedback-${qId}`);
+
+            symbolBox.innerText = chosen;
+            quizState[qId].answered = true;
+
+            feedback.classList.remove('hidden', 'bg-emerald-100', 'text-emerald-800', 'bg-rose-100', 'text-rose-800');
+
+            if (chosen === target) {
+                quizState[qId].correct = true;
+                quizState[qId].score = 11;
+                symbolBox.className = "w-10 h-10 rounded-lg bg-emerald-500 text-white font-bold text-xl flex items-center justify-center shadow";
+                feedback.className = "text-xs mt-3 p-2.5 rounded-lg bg-emerald-100 text-emerald-900 border border-emerald-300";
+                feedback.innerHTML = `<i class="fa-solid fa-check-circle text-emerald-600"></i> <strong>Benar!</strong> ${explanation}.`;
+            } else {
+                quizState[qId].correct = false;
+                quizState[qId].score = 0;
+                symbolBox.className = "w-10 h-10 rounded-lg bg-rose-500 text-white font-bold text-xl flex items-center justify-center shadow";
+                feedback.className = "text-xs mt-3 p-2.5 rounded-lg bg-rose-100 text-rose-900 border border-rose-300";
+                feedback.innerHTML = `<i class="fa-solid fa-times-circle text-rose-600"></i> Jawaban tepat adalah <strong>"${target}"</strong>. ${explanation}.`;
+            }
+
+            updateTotalScore();
+        }
+
+        // --- Section 3 Card Rendering & Shifting ---
+        function renderOrderCards(qId) {
+            const container = document.getElementById(`sort-container-${qId}`);
+            container.innerHTML = '';
+
+            const arr = orderData[qId].current;
+
+            arr.forEach((num, index) => {
+                const card = document.createElement('div');
+                card.className = "bg-white shadow-sm border border-slate-300 rounded-xl px-3 py-2 flex items-center gap-2 transition hover:border-indigo-400";
+                
+                // Left arrow
+                const leftBtn = document.createElement('button');
+                leftBtn.className = "w-6 h-6 rounded bg-slate-100 hover:bg-indigo-100 text-slate-600 hover:text-indigo-700 text-xs font-bold flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed";
+                leftBtn.innerHTML = '<i class="fa-solid fa-chevron-left"></i>';
+                leftBtn.disabled = index === 0;
+                leftBtn.onclick = () => moveCard(qId, index, -1);
+
+                // Number Display
+                const numSpan = document.createElement('span');
+                numSpan.className = "font-mono font-bold text-slate-800 px-2 text-base";
+                numSpan.innerText = num;
+
+                // Right arrow
+                const rightBtn = document.createElement('button');
+                rightBtn.className = "w-6 h-6 rounded bg-slate-100 hover:bg-indigo-100 text-slate-600 hover:text-indigo-700 text-xs font-bold flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed";
+                rightBtn.innerHTML = '<i class="fa-solid fa-chevron-right"></i>';
+                rightBtn.disabled = index === arr.length - 1;
+                rightBtn.onclick = () => moveCard(qId, index, 1);
+
+                card.appendChild(leftBtn);
+                card.appendChild(numSpan);
+                card.appendChild(rightBtn);
+
+                container.appendChild(card);
+            });
+        }
+
+        function moveCard(qId, index, direction) {
+            const arr = orderData[qId].current;
+            const targetIndex = index + direction;
+            if (targetIndex >= 0 && targetIndex < arr.length) {
+                // Swap elements
+                const temp = arr[index];
+                arr[index] = arr[targetIndex];
+                arr[targetIndex] = temp;
+                renderOrderCards(qId);
+            }
+        }
+
+        function checkOrdering(qId) {
+            const current = orderData[qId].current;
+            const target = orderData[qId].target;
+            const feedback = document.getElementById(`feedback-${qId}`);
+
+            let isMatch = true;
+            for (let i = 0; i < current.length; i++) {
+                if (current[i] !== target[i]) {
+                    isMatch = false;
+                    break;
+                }
+            }
+
+            quizState[qId].answered = true;
+            quizState[qId].correct = isMatch;
+            quizState[qId].score = isMatch ? 11 : 0;
+
+            if (isMatch) {
+                feedback.className = "text-xs font-semibold text-emerald-600 flex items-center gap-1";
+                feedback.innerHTML = '<i class="fa-solid fa-circle-check"></i> Urutan Benar! (' + target.join(', ') + ')';
+            } else {
+                feedback.className = "text-xs font-semibold text-rose-600 flex items-center gap-1";
+                feedback.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> Belum tepat. Kunci: ' + target.join(', ');
+            }
+
+            updateTotalScore();
+        }
+
+        // --- Score Aggregation & Modal ---
+        function updateTotalScore() {
+            let total = 0;
+            let answeredCount = 0;
+
+            Object.keys(quizState).forEach(key => {
+                total += quizState[key].score;
+                if (quizState[key].answered) answeredCount++;
+            });
+
+            // Adjust scaling so all correct = 100
+            let displayScore = Math.min(100, Math.round(total * (100 / 99)));
+            if (answeredCount === 9 && Object.values(quizState).every(q => q.correct)) {
+                displayScore = 100;
+            }
+
+            document.getElementById('score-display').innerText = `${displayScore} / 100`;
+            return { displayScore, answeredCount };
+        }
+
+        function showFinalReport() {
+            const { displayScore, answeredCount } = updateTotalScore();
+
+            document.getElementById('modal-score').innerText = `${displayScore} / 100`;
+            document.getElementById('modal-answered').innerText = `${answeredCount} dari 9 Soal`;
+            document.getElementById('modal-progress-bar').style.width = `${(answeredCount / 9) * 100}%`;
+
+            const evalBox = document.getElementById('modal-evaluation');
+            if (displayScore >= 80) {
+                evalBox.className = "text-xs text-emerald-900 bg-emerald-50 p-3 rounded-lg border border-emerald-300 leading-relaxed";
+                evalBox.innerHTML = `<strong><i class="fa-solid fa-award text-emerald-600"></i> Sangat Baik!</strong> Selamat, ananda telah memahami konsep positif, negatif, membandingkan, serta mengurutkan bilangan bulat dengan sangat matang!`;
+            } else if (displayScore >= 50) {
+                evalBox.className = "text-xs text-amber-900 bg-amber-50 p-3 rounded-lg border border-amber-300 leading-relaxed";
+                evalBox.innerHTML = `<strong><i class="fa-solid fa-thumbs-up text-amber-600"></i> Cukup Baik!</strong> Ananda sudah bisa memahami sebagian besar soal. Perhatikan kembali prinsip bilangan negatif (semakin besar angkanya di sebelah kiri negatif, semakin kecil nilainya).`;
+            } else {
+                evalBox.className = "text-xs text-slate-800 bg-slate-100 p-3 rounded-lg border border-slate-300 leading-relaxed";
+                evalBox.innerHTML = `<strong><i class="fa-solid fa-book-open text-indigo-600"></i> Tetap Semangat!</strong> Gunakan Garis Bilangan Interaktif di bagian atas web ini untuk membantu memvisualisasikan posisi angka sebelum menjawab.`;
+            }
+
+            document.getElementById('report-modal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('report-modal').classList.add('hidden');
+        }
+
+        function resetAllQuiz() {
+            Object.keys(quizState).forEach(key => {
+                quizState[key] = { answered: false, correct: false, score: 0 };
+            });
+
+            // Reset Section 1
+            ['1a', '1b', '1c'].forEach(q => {
+                const fb = document.getElementById(`feedback-${q}`);
+                if (fb) fb.classList.add('hidden');
+            });
+
+            // Reset Section 2
+            ['2a', '2b', '2c'].forEach(q => {
+                const symbolBox = document.getElementById(`symbol-${q}`);
+                const fb = document.getElementById(`feedback-${q}`);
+                if (symbolBox) {
+                    symbolBox.innerText = '?';
+                    symbolBox.className = "w-10 h-10 rounded-lg border-2 border-dashed border-amber-400 bg-white flex items-center justify-center font-bold text-amber-600 text-xl shadow-inner";
+                }
+                if (fb) fb.classList.add('hidden');
+            });
+
+            // Reset Section 3
+            orderData['3a'].current = [-2, 12, -8, 4];
+            orderData['3b'].current = [23, -47, -32, 48];
+            orderData['3c'].current = [-11, 21, -59, -100];
+
+            ['3a', '3b', '3c'].forEach(q => {
+                renderOrderCards(q);
+                const fb = document.getElementById(`feedback-${q}`);
+                if (fb) fb.innerHTML = '';
+            });
+
+            updateTotalScore();
+        }
+    </script>
+</body>
+</html>
